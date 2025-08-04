@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>2025-04-03 - Ethrex</title>
+        <title>Roadmap - Ethrex</title>
 
 
         <!-- Custom HTML head -->
@@ -237,72 +237,54 @@
 }
 
 </style>
-<h1 id="eliminating-redundant-rlp-encoding-in-trie-pr-2353"><a class="header" href="#eliminating-redundant-rlp-encoding-in-trie-pr-2353">Eliminating redundant RLP encoding in trie (PR #2353)</a></h1>
-<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
-<p>This PR addresses a performance bottleneck in our Merkle-Patricia Trie implementation caused by redundant RLP (Recursive Length Prefix) encoding operations. By refactoring the encoding logic to avoid double-encoding, we achieved <strong>1.5x–2x faster trie insertions</strong> for workloads of 1k and 10k nodes.</p>
-<h2 id="context"><a class="header" href="#context">Context</a></h2>
-<p>The trie structure is critical for Ethereum state management, and its performance directly impacts node synchronization and block processing times. RLP encoding is used extensively to serialize trie nodes for hashing and storage. Profiling revealed that a significant portion of insertion time was spent on unnecessary RLP re-encoding.</p>
-<h2 id="tools--methodology"><a class="header" href="#tools--methodology">Tools &amp; Methodology</a></h2>
-<h3 id="profiling-tools"><a class="header" href="#profiling-tools">Profiling Tools</a></h3>
-<ol>
-<li><strong><a href="https://github.com/mstange/samply">Samply</a></strong>:
-<ul>
-<li>Sampled CPU usage during trie insertions, identifying RLP encoding as a hotspot (15% of runtime).</li>
-<li>Generated <a href="https://share.firefox.dev/43z7r8V">flamegraph</a> showing <code>encode_to_vec</code> taking a considerable amount of time.</li>
-</ul>
-</li>
-<li><strong>Cargo Bench</strong>:
-<ul>
-<li>Provided reproducible benchmarks for trie insertions (1k/10k nodes).</li>
-</ul>
-</li>
-</ol>
-<h3 id="benchmark-setup"><a class="header" href="#benchmark-setup">Benchmark Setup</a></h3>
-<ul>
-<li>
-<p><strong>Code Location</strong>: Benchmarks are defined in <code>crates/common/trie/benches/trie_bench.rs</code>.</p>
-</li>
-<li>
-<p><strong>How to Run</strong>:</p>
-<pre><code class="language-bash"># Navigate to the trie crate
-cd crates/common/trie
-
-# Run benchmarks (includes warmup and simple statistics with cargo-bench)
-make bench
-</code></pre>
-</li>
-</ul>
-<h3 id="hardware"><a class="header" href="#hardware">Hardware</a></h3>
-<ul>
-<li><strong>Apple M3 Max</strong>: 14-core CPU, 36GB RAM, 1TB SSD.</li>
-</ul>
-<h2 id="benchmark-results"><a class="header" href="#benchmark-results">Benchmark Results</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Workload</th><th>Baseline (ms)</th><th>After PR #2353 (ms)</th></tr></thead><tbody>
-<tr><td>Insert 1k Nodes</td><td>9.96 – 10.02</td><td>5.78 – 5.82</td></tr>
-<tr><td>Insert 10k Nodes</td><td>111.2 – 111.6</td><td>67.6 – 68.6</td></tr>
+<h1 id="roadmap"><a class="header" href="#roadmap">Roadmap</a></h1>
+<p>This project is under active development. Over the next <strong>two months</strong>, our <strong>primary objective is to finalize and audit the first version of the stack</strong>.
+This means every component — from L1 syncing to L2 bridging and prover integration — must meet stability, performance, and security standards.</p>
+<p>The roadmap below outlines the remaining work required to achieve this milestone, organized into three major areas: <strong>L2</strong>, <strong>DevOps &amp; Performance</strong>, and <strong>L1</strong>.</p>
+<hr />
+<h2 id="l2-roadmap"><a class="header" href="#l2-roadmap">L2 Roadmap</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Description</th><th>Status</th></tr></thead><tbody>
+<tr><td>Native Bridge</td><td>Secure and trust-minimized ERC-20 bridge between Ethereum L1 and L2 using canonical messaging and smart contracts.</td><td>In Progress</td></tr>
+<tr><td>Based Rollup</td><td>Launch the rollup as a based permissionless rollup. Leverages Ethereum for sequencing and DA. For more information check <a href="https://hackmd.io/TCa-bQisToW46enF58_3Vw?view">ethrex roadmap for becoming based</a></td><td>In Progress</td></tr>
+<tr><td>Aligned Integration</td><td>Optimize integration with Aligned’s aggregation mode.</td><td>In Progress</td></tr>
+<tr><td>Risc0 Support</td><td>Integrate RISC Zero as an alternative zkVM to SP1, enabling configurable proving backends.</td><td>In Progress</td></tr>
+<tr><td>Battle-Test the Prover</td><td>Ensure the prover (e.g., SP1, Risc0) is robust, correct, and performant under production-level  conditions.</td><td>In Progress</td></tr>
+<tr><td>One-Click L2 Deployment</td><td>Deploy a fully operational rollup with a single command. Includes TDX, Prover, integrated Grafana metrics, alerting system, block explorer, bridge hub, backups and default configuration for rapid developer spin-up.</td><td>In Progress</td></tr>
+<tr><td>Shared Bridge</td><td>Direct bridging between multiple L2s to improve UX and avoid L1 costs.</td><td>Planned</td></tr>
+<tr><td>Custom Native Token</td><td>Define a native token (non-ETH) for gas, staking, incentives, and governance. Fully integrated into fee mechanics and bridging.</td><td>Planned</td></tr>
+<tr><td>Validiums &amp; DACs</td><td>Enhance Validium mode with Data Availability Committees.</td><td>Planned</td></tr>
+<tr><td>Gas &amp; Fees</td><td>Set up a custom fee model to price deposits or any forced-included transaction, including data availability costs.</td><td>Planned</td></tr>
 </tbody></table>
 </div>
-<h2 id="technical-breakdown"><a class="header" href="#technical-breakdown">Technical Breakdown</a></h2>
-<h3 id="issue-redundant-rlp-encoding"><a class="header" href="#issue-redundant-rlp-encoding">Issue: Redundant RLP Encoding</a></h3>
-<p>The original code calculated the length of an RLP-encoded sequence by:</p>
-<ol>
-<li>Encoding the entire structure to a temporary buffer.</li>
-<li>Measuring the buffer's length.</li>
-<li>Re-encoding the structure with the length prefix.</li>
-</ol>
-<p>This resulted in <strong>two full encoding passes</strong> for each time we needed to RLP-encode a structure.</p>
-<h3 id="fix-single-pass-encoding"><a class="header" href="#fix-single-pass-encoding">Fix: Single-Pass Encoding</a></h3>
-<p>We replaced the double-encoding logic with a single pass, and then
-appending the length as the size of the encoded buffer (number of bytes).</p>
-
+<hr />
+<h2 id="devops--performance"><a class="header" href="#devops--performance">DevOps &amp; Performance</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Initiative</th><th>Description</th><th>Status</th></tr></thead><tbody>
+<tr><td>Performance Benchmarking</td><td>Continuous <code>ggas/s</code> measurement, client comparison, and reproducible load tests.</td><td>In Progress</td></tr>
+<tr><td>DB Optimizations</td><td>Snapshots, background trie commits, parallel Merkle root calculation, and exploratory DB design.</td><td>In Progress</td></tr>
+<tr><td>EVM Profiling</td><td>Identify and optimize execution bottlenecks in the VM.</td><td>In Progress</td></tr>
+<tr><td>Deployment &amp; Dev Experience</td><td>One-command L2 launch, localnet spam testing, and L1 syncing on any network.</td><td>In Progress</td></tr>
+</tbody></table>
+</div>
+<hr />
+<h2 id="l1-roadmap"><a class="header" href="#l1-roadmap">L1 Roadmap</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Description</th><th>Status</th></tr></thead><tbody>
+<tr><td>P2P Improvements</td><td>Use <a href="https://github.com/lambdaclass/spawned">spawned</a> to improve peer discovery, sync reliability, and connection handling.</td><td>In Progress</td></tr>
+<tr><td>Chain Syncing</td><td>Verify the execution of all blocks across all chains. For Proof-of-Stake (PoS) chains (Holesky, Hoodi), verify all blocks since genesis. For chains with a pre-Merge genesis (Sepolia, Mainnet), verify all blocks after the Merge.</td><td>In Progress</td></tr>
+<tr><td>Snap Sync</td><td>Improve Snap Sync implementation to make it more reliable and efficient.</td><td>Planned</td></tr>
+<tr><td>Client Stability</td><td>Increase client resilience to adverse scenarios and network disruptions. Improve observability and logging.</td><td>Planned</td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../perf_reports/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../getting-started/running.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="../l1/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -310,10 +292,13 @@ appending the length as the size of the encoded buffer (number of bytes).</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../perf_reports/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../getting-started/running.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="../l1/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

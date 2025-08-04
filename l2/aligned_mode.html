@@ -169,7 +169,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <style>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -246,9 +247,20 @@
 </p>
 <p>For this guide we assumed that there is an L1 running with all Aligned environment set.</p>
 </div>
-<h3 id="1-deploying-l1-contracts"><a class="header" href="#1-deploying-l1-contracts">1. Deploying L1 Contracts</a></h3>
+<h3 id="1-generate-the-sp1-elf-program-and-verification-key"><a class="header" href="#1-generate-the-sp1-elf-program-and-verification-key">1. Generate the SP1 ELF Program and Verification Key</a></h3>
+<p>Run:</p>
+<pre><code class="language-bash">cd ethrex/crates/l2
+SP1_PROVER=cuda make build-prover PROVER=sp1 PROVER_CLIENT_ALIGNED=true
+</code></pre>
+<p>This will generate the SP1 ELF program and verification key under:</p>
+<ul>
+<li><code>crates/l2/prover/zkvm/interface/sp1/out/riscv32im-succinct-zkvm-elf</code></li>
+<li><code>crates/l2/prover/zkvm/interface/sp1/out/riscv32im-succinct-zkvm-vk</code></li>
+</ul>
+<h3 id="2-deploying-l1-contracts"><a class="header" href="#2-deploying-l1-contracts">2. Deploying L1 Contracts</a></h3>
 <p>In a console with <code>ethrex/crates/l2</code> as the current directory, run the following command:</p>
-<pre><code class="language-bash">cargo run --release --bin ethrex_l2_l1_deployer --manifest-path contracts/Cargo.toml -- \
+<pre><code class="language-bash">COMPILE_CONTRACTS=true \ 
+cargo run --release --bin ethrex_l2_l1_deployer --manifest-path contracts/Cargo.toml -- \
 	--eth-rpc-url &lt;L1_RPC_URL&gt; \
 	--private-key &lt;L1_PRIVATE_KEY&gt; \
 	--genesis-l1-path &lt;GENESIS_L1_PATH&gt; \
@@ -261,17 +273,19 @@
     --bridge-owner &lt;ADDRESS&gt; \
     --on-chain-proposer-owner &lt;ADDRESS&gt; \
     --private-keys-file-path &lt;PRIVATE_KEYS_FILE_PATH&gt; \
-    --sequencer-registry-owner &lt;ADDRESS&gt;
+    --sequencer-registry-owner &lt;ADDRESS&gt; \
+    --sp1-vk-path &lt;SP1_VERIFICATION_KEY_PATH&gt;
 </code></pre>
 <div class="mdbook-alerts mdbook-alerts-note">
 <p class="mdbook-alerts-title">
   <span class="mdbook-alerts-icon"></span>
   note
 </p>
-<p>In this step we are initiallizing the <code>OnChainProposer</code> contract with the <code>ALIGNED_PROOF_AGGREGATOR_SERVICE_ADDRESS</code> and skipping the rest of verifiers.<br />
+<p>This command requires the COMPILE_CONTRACTS env variable to be set, as the deployer needs the SDK to embed the proxy bytecode.<br />
+In this step we are initiallizing the <code>OnChainProposer</code> contract with the <code>ALIGNED_PROOF_AGGREGATOR_SERVICE_ADDRESS</code> and skipping the rest of verifiers.<br />
 Save the addresses of the deployed proxy contracts, as you will need them to run the L2 node.</p>
 </div>
-<h3 id="2-deposit-funds-to-the-alignedbatchepaymentservice-contract-from-the-proof-sender"><a class="header" href="#2-deposit-funds-to-the-alignedbatchepaymentservice-contract-from-the-proof-sender">2. Deposit funds to the <code>AlignedBatchePaymentService</code> contract from the proof sender</a></h3>
+<h3 id="3-deposit-funds-to-the-alignedbatcherpaymentservice-contract-from-the-proof-sender"><a class="header" href="#3-deposit-funds-to-the-alignedbatcherpaymentservice-contract-from-the-proof-sender">3. Deposit funds to the <code>AlignedBatcherPaymentService</code> contract from the proof sender</a></h3>
 <pre><code class="language-bash">aligned \
 --network &lt;NETWORK&gt; \
 --private_key &lt;PROOF_SENDER_PRIVATE_KEY&gt; \
@@ -284,10 +298,10 @@ Save the addresses of the deployed proxy contracts, as you will need them to run
 </p>
 <p>Using the <a href="https://docs.alignedlayer.com/guides/9_aligned_cli">Aligned CLI</a></p>
 </div>
-<h3 id="3-running-a-node"><a class="header" href="#3-running-a-node">3. Running a node</a></h3>
+<h3 id="4-running-a-node"><a class="header" href="#4-running-a-node">4. Running a node</a></h3>
 <p>In a console with <code>ethrex/crates/l2</code> as the current directory, run the following command:</p>
 <pre><code class="language-bash">cargo run --release --manifest-path ../../Cargo.toml --bin ethrex --features "l2" -- \
-	l2 init \
+	l2 \
 	--watcher.block-delay &lt;WATCHER_BLOCK_DELAY&gt; \
 	--network &lt;L2_GENESIS_FILE_PATH&gt; \
 	--http.port &lt;L2_PORT&gt; \
@@ -321,6 +335,13 @@ Save the addresses of the deployed proxy contracts, as you will need them to run
 <pre><code class="language-bash">SP1_PROVER=cuda make init-prover PROVER=sp1 PROVER_CLIENT_ALIGNED=true
 </code></pre>
 <h2 id="how-to-run-using-an-aligned-dev-environment"><a class="header" href="#how-to-run-using-an-aligned-dev-environment">How to Run Using an Aligned Dev Environment</a></h2>
+<div class="mdbook-alerts mdbook-alerts-important">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  important
+</p>
+<p>This guide asumes you have already generated the SP1 ELF Program and Verification Key. See: <a href="#1-generate-the-sp1-elf-program-and-verification-key">Generate the SP1 ELF Program and Verification Key</a></p>
+</div>
 <h3 id="set-up-the-aligned-environment"><a class="header" href="#set-up-the-aligned-environment">Set Up the Aligned Environment</a></h3>
 <ol>
 <li>Clone the Aligned repository and checkout the currently supported release:</li>
@@ -380,7 +401,8 @@ let ws_stream_future =
 <ol>
 <li>In another terminal, let's deploy the L1 contracts specifying the <code>AlignedProofAggregatorService</code> contract address:</li>
 </ol>
-<pre><code>cd ethrex/crates/l2
+<pre><code class="language-bash">cd ethrex/crates/l2
+COMPILE_CONTRACTS=true \ 
 cargo run --release --bin ethrex_l2_l1_deployer --manifest-path contracts/Cargo.toml -- \
 	--eth-rpc-url http://localhost:8545 \
 	--private-key 0x385c546456b6a603a1cfcaa9ec9494ba4832da08dd6bcf4de9a71e4a01b74924 \
@@ -389,13 +411,20 @@ cargo run --release --bin ethrex_l2_l1_deployer --manifest-path contracts/Cargo.
 	--sp1.verifier-address 0x00000000000000000000000000000000000000aa \
 	--tdx.verifier-address 0x00000000000000000000000000000000000000aa \
 	--aligned.aggregator-address 0xFD471836031dc5108809D173A067e8486B9047A3 \
-	--on-chain-proposer-owner 0x03d0a0aee676cc45bf7032649e0871927c947c8e \
-	--bridge-owner 0x03d0a0aee676cc45bf7032649e0871927c947c8e \
+	--on-chain-proposer-owner 0x4417092b70a3e5f10dc504d0947dd256b965fc62 \
+	--bridge-owner 0x4417092b70a3e5f10dc504d0947dd256b965fc62 \
 	--deposit-rich \
-	--private-keys-file-path ../../test_data/private_keys_l1.txt \
-	--genesis-l1-path ../../test_data/genesis-l1-dev.json \
-	--genesis-l2-path ../../test_data/genesis-l2.json
+	--private-keys-file-path ../../fixtures/keys/private_keys_l1.txt \
+	--genesis-l1-path ../../fixtures/genesis/l1-dev.json \
+	--genesis-l2-path ../../fixtures/genesis/l2.json
 </code></pre>
+<div class="mdbook-alerts mdbook-alerts-note">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  note
+</p>
+<p>This command requires the COMPILE_CONTRACTS env variable to be set, as the deployer needs the SDK to embed the proxy bytecode.</p>
+</div>
 <p>You will see that some deposits fail with the following error:</p>
 <pre><code>2025-06-18T19:19:24.066126Z  WARN ethrex_l2_l1_deployer: Failed to make deposits: Deployer EthClient error: eth_estimateGas request error: execution reverted: CommonBridge: amount to deposit is zero: CommonBridge: amount to deposit is zero
 </code></pre>
@@ -413,7 +442,7 @@ cargo run deposit-to-batcher \
 <li>Start our l2 node:</li>
 </ol>
 <pre><code>cd ethrex/crates/l2
-ETHREX_PROOF_COORDINATOR_DEV_MODE=false cargo run --release --manifest-path ../../Cargo.toml --bin ethrex --features "l2,rollup_storage_libmdbx,metrics" -- l2 init --watcher.block-delay 0 --network ../../test_data/genesis-l2.json --http.port 1729 --http.addr 0.0.0.0 --evm levm --datadir dev_ethrex_l2 --l1.bridge-address &lt;BRIDGE_ADDRESS&gt; --l1.on-chain-proposer-address &lt;ON_CHAIN_PROPOSER_ADDRESS&gt; --eth.rpc-url http://localhost:8545 --block-producer.coinbase-address 0x0007a881CD95B1484fca47615B64803dad620C8d --committer.l1-private-key 0x385c546456b6a603a1cfcaa9ec9494ba4832da08dd6bcf4de9a71e4a01b74924 --proof-coordinator.l1-private-key 0x39725efee3fb28614de3bacaffe4cc4bd8c436257e2c8bb887c4b5c4be45e76d --proof-coordinator.addr 127.0.0.1 --aligned --aligned.beacon-url http://127.0.0.1:58801 --aligned-network devnet --aligned-sp1-elf-path prover/zkvm/interface/sp1/out/riscv32im-succinct-zkvm-elf
+ETHREX_PROOF_COORDINATOR_DEV_MODE=false cargo run --release --manifest-path ../../Cargo.toml --bin ethrex --features "l2,rollup_storage_libmdbx,metrics" -- l2 --watcher.block-delay 0 --network ../../fixtures/genesis/l2.json --http.port 1729 --http.addr 0.0.0.0 --evm levm --datadir dev_ethrex_l2 --l1.bridge-address &lt;BRIDGE_ADDRESS&gt; --l1.on-chain-proposer-address &lt;ON_CHAIN_PROPOSER_ADDRESS&gt; --eth.rpc-url http://localhost:8545 --block-producer.coinbase-address 0x0007a881CD95B1484fca47615B64803dad620C8d --committer.l1-private-key 0x385c546456b6a603a1cfcaa9ec9494ba4832da08dd6bcf4de9a71e4a01b74924 --proof-coordinator.l1-private-key 0x39725efee3fb28614de3bacaffe4cc4bd8c436257e2c8bb887c4b5c4be45e76d --proof-coordinator.addr 127.0.0.1 --aligned --aligned.beacon-url http://127.0.0.1:58801 --aligned-network devnet --aligned-sp1-elf-path prover/zkvm/interface/sp1/out/riscv32im-succinct-zkvm-elf
 </code></pre>
 <div class="mdbook-alerts mdbook-alerts-important">
 <p class="mdbook-alerts-title">
@@ -423,8 +452,8 @@ ETHREX_PROOF_COORDINATOR_DEV_MODE=false cargo run --release --manifest-path ../.
 <p>Set <code>BRIDGE_ADDRESS</code> and <code>ON_CHAIN_PROPOSER_ADDRESS</code> with the values printed in step 1.</p>
 </div>
 <p>Suggestion:
-When running the integration test, consider increasing the <code>commit-time-ms</code> to 2 minutes. This helps avoid having to aggregate the proofs twice. You can do this by adding the following flag to the <code>init-l2-no-metrics</code> target:</p>
-<pre><code>--commit-time-ms 120000
+When running the integration test, consider increasing the <code>--committer.commit-time</code> to 2 minutes. This helps avoid having to aggregate the proofs twice. You can do this by adding the following flag to the <code>init-l2-no-metrics</code> target:</p>
+<pre><code>--committer.commit-time 120000
 </code></pre>
 <ol start="4">
 <li>Start prover:</li>
@@ -433,9 +462,16 @@ When running the integration test, consider increasing the <code>commit-time-ms<
 SP1_PROVER=cuda make init-prover PROVER=sp1 PROVER_CLIENT_ALIGNED=true
 </code></pre>
 <h3 id="aggregate-proofs"><a class="header" href="#aggregate-proofs">Aggregate proofs:</a></h3>
-<p>After some time, you will see that the <code>l1_proof_verifier</code> is waiting for Aligned to aggregate the proofs. You can aggregate them by running:</p>
+<p>After some time, you will see that the <code>l1_proof_verifier</code> is waiting for Aligned to aggregate the proofs:</p>
+<pre><code>2025-06-18T22:03:53.470356Z  INFO ethrex_l2::sequencer::l1_proof_verifier: Batch 1 has not yet been aggregated by Aligned. Waiting for 5 seconds
+</code></pre>
+<p>You can aggregate them by running:</p>
 <pre><code>cd aligned_layer
 make start_proof_aggregator AGGREGATOR=sp1
+</code></pre>
+<p>If successful, the <code>l1_proof_verifier</code> will print the following logs:</p>
+<pre><code>INFO ethrex_l2::sequencer::l1_proof_verifier: Proof for batch 1 aggregated by Aligned with commitment 0xa9a0da5a70098b00f97d96cee43867c7aa8f5812ca5388da7378454580af2fb7 and Merkle root 0xa9a0da5a70098b00f97d96cee43867c7aa8f5812ca5388da7378454580af2fb7
+INFO ethrex_l2::sequencer::l1_proof_verifier: Batches verified in OnChainProposer, with transaction hash 0x731d27d81b2e0f1bfc0f124fb2dd3f1a67110b7b69473cacb6a61dea95e63321
 </code></pre>
 <h2 id="behavioral-differences-in-aligned-mode"><a class="header" href="#behavioral-differences-in-aligned-mode">Behavioral Differences in Aligned Mode</a></h2>
 <h3 id="prover"><a class="header" href="#prover">Prover</a></h3>
@@ -451,17 +487,16 @@ make start_proof_aggregator AGGREGATOR=sp1
 <p><img src="img/aligned_mode_proof_sender.png" alt="Proof Sender Aligned Mode" /></p>
 <h3 id="proof-verifier"><a class="header" href="#proof-verifier">Proof Verifier</a></h3>
 <ul>
-<li>Only spawned in Aligned mode.</li>
+<li>Spawned only in Aligned mode.</li>
 <li>Monitors whether the next proof has been aggregated by Aligned.</li>
-<li>Once verified, it triggers the advancement of the <code>OnChainProposer</code> contract.</li>
+<li>Once verified, collects all already aggregated proofs and triggers the advancement of the <code>OnChainProposer</code> contract by sending a single transaction.</li>
 </ul>
 <p><img src="img/aligned_mode_proof_verifier.png" alt="Aligned Mode Proof Verifier" /></p>
 <h3 id="onchainproposer"><a class="header" href="#onchainproposer">OnChainProposer</a></h3>
 <ul>
-<li>Uses <code>verifyBatchAligned()</code> instead of <code>verifyBatch()</code>.</li>
+<li>Uses <code>verifyBatchesAligned()</code> instead of <code>verifyBatch()</code>.</li>
+<li>Receives an array of proofs to verify.</li>
 <li>Delegates proof verification to the <code>AlignedProofAggregatorService</code> contract.</li>
-<li>Currently supports one proof per transaction.</li>
-<li>Future updates aim to support verifying an array of proofs in a single call.</li>
 </ul>
 
                     </main>

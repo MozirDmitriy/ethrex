@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>2025-04-03 - Ethrex</title>
+        <title>Installing ethrex - Ethrex</title>
 
 
         <!-- Custom HTML head -->
@@ -237,72 +237,94 @@
 }
 
 </style>
-<h1 id="eliminating-redundant-rlp-encoding-in-trie-pr-2353"><a class="header" href="#eliminating-redundant-rlp-encoding-in-trie-pr-2353">Eliminating redundant RLP encoding in trie (PR #2353)</a></h1>
-<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
-<p>This PR addresses a performance bottleneck in our Merkle-Patricia Trie implementation caused by redundant RLP (Recursive Length Prefix) encoding operations. By refactoring the encoding logic to avoid double-encoding, we achieved <strong>1.5x–2x faster trie insertions</strong> for workloads of 1k and 10k nodes.</p>
-<h2 id="context"><a class="header" href="#context">Context</a></h2>
-<p>The trie structure is critical for Ethereum state management, and its performance directly impacts node synchronization and block processing times. RLP encoding is used extensively to serialize trie nodes for hashing and storage. Profiling revealed that a significant portion of insertion time was spent on unnecessary RLP re-encoding.</p>
-<h2 id="tools--methodology"><a class="header" href="#tools--methodology">Tools &amp; Methodology</a></h2>
-<h3 id="profiling-tools"><a class="header" href="#profiling-tools">Profiling Tools</a></h3>
-<ol>
-<li><strong><a href="https://github.com/mstange/samply">Samply</a></strong>:
-<ul>
-<li>Sampled CPU usage during trie insertions, identifying RLP encoding as a hotspot (15% of runtime).</li>
-<li>Generated <a href="https://share.firefox.dev/43z7r8V">flamegraph</a> showing <code>encode_to_vec</code> taking a considerable amount of time.</li>
-</ul>
-</li>
-<li><strong>Cargo Bench</strong>:
-<ul>
-<li>Provided reproducible benchmarks for trie insertions (1k/10k nodes).</li>
-</ul>
-</li>
-</ol>
-<h3 id="benchmark-setup"><a class="header" href="#benchmark-setup">Benchmark Setup</a></h3>
-<ul>
-<li>
-<p><strong>Code Location</strong>: Benchmarks are defined in <code>crates/common/trie/benches/trie_bench.rs</code>.</p>
-</li>
-<li>
-<p><strong>How to Run</strong>:</p>
-<pre><code class="language-bash"># Navigate to the trie crate
-cd crates/common/trie
+<h1 id="installing-ethrex"><a class="header" href="#installing-ethrex">Installing ethrex</a></h1>
+<p>Before <a href="./running.html">running the ethrex client</a>, you need to install it.
+We have multiple ways to install, depending on your needs.</p>
+<p>Pre-built binaries for Linux and macOS are available for each release.
+See <a href="#installing-from-pre-built-binaries">Installing from pre-built binaries</a> for installation instructions.</p>
+<p>You can also <a href="#installing-through-cargo-install">install through cargo install</a>, or <a href="#building-from-source">build the client from source</a>.</p>
+<h2 id="installing-from-pre-built-binaries"><a class="header" href="#installing-from-pre-built-binaries">Installing from pre-built binaries</a></h2>
+<p>To install ethrex from pre-built binaries, first download the binaries for your platform from the <a href="https://github.com/lambdaclass/ethrex/releases">release page</a>.
+You can also download it from the command line using <code>curl</code> or <code>wget</code>:</p>
+<pre><code class="language-sh"># For Linux x86_64
+curl -L https://github.com/lambdaclass/ethrex/releases/latest/download/ethrex-linux_x86_64 -o ethrex
+wget https://github.com/lambdaclass/ethrex/releases/latest/download/ethrex-linux_x86_64 -O ethrex
 
-# Run benchmarks (includes warmup and simple statistics with cargo-bench)
-make bench
+# For Linux ARM
+curl -L https://github.com/lambdaclass/ethrex/releases/latest/download/ethrex-linux_aarch64 -o ethrex
+wget https://github.com/lambdaclass/ethrex/releases/latest/download/ethrex-linux_aarch64 -O ethrex
+
+# For MacOS
+curl -L https://github.com/lambdaclass/ethrex/releases/latest/download/ethrex-macos_aarch64 -o ethrex
+wget https://github.com/lambdaclass/ethrex/releases/latest/download/ethrex-macos_aarch64 -O ethrex
 </code></pre>
-</li>
-</ul>
-<h3 id="hardware"><a class="header" href="#hardware">Hardware</a></h3>
-<ul>
-<li><strong>Apple M3 Max</strong>: 14-core CPU, 36GB RAM, 1TB SSD.</li>
-</ul>
-<h2 id="benchmark-results"><a class="header" href="#benchmark-results">Benchmark Results</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Workload</th><th>Baseline (ms)</th><th>After PR #2353 (ms)</th></tr></thead><tbody>
-<tr><td>Insert 1k Nodes</td><td>9.96 – 10.02</td><td>5.78 – 5.82</td></tr>
-<tr><td>Insert 10k Nodes</td><td>111.2 – 111.6</td><td>67.6 – 68.6</td></tr>
-</tbody></table>
+<p>And set the execution bit:</p>
+<pre><code class="language-sh">chmod +x ethrex
+</code></pre>
+<p>After that, you can verify the program is working by running:</p>
+<pre><code class="language-sh">./ethrex --version
+</code></pre>
+<p>This should output something like:</p>
+<pre><code class="language-text">ethrex ethrex/v0.1.0-HEAD-23191af/aarch64-apple-darwin/rustc-v1.87.0
+</code></pre>
+<div class="mdbook-alerts mdbook-alerts-tip">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  tip
+</p>
+<p>For convenience, you can move the <code>ethrex</code> binary to a directory in your <code>PATH</code>, so you can run it from anywhere.</p>
 </div>
-<h2 id="technical-breakdown"><a class="header" href="#technical-breakdown">Technical Breakdown</a></h2>
-<h3 id="issue-redundant-rlp-encoding"><a class="header" href="#issue-redundant-rlp-encoding">Issue: Redundant RLP Encoding</a></h3>
-<p>The original code calculated the length of an RLP-encoded sequence by:</p>
-<ol>
-<li>Encoding the entire structure to a temporary buffer.</li>
-<li>Measuring the buffer's length.</li>
-<li>Re-encoding the structure with the length prefix.</li>
-</ol>
-<p>This resulted in <strong>two full encoding passes</strong> for each time we needed to RLP-encode a structure.</p>
-<h3 id="fix-single-pass-encoding"><a class="header" href="#fix-single-pass-encoding">Fix: Single-Pass Encoding</a></h3>
-<p>We replaced the double-encoding logic with a single pass, and then
-appending the length as the size of the encoded buffer (number of bytes).</p>
+<p>After installing the client, see <a href="./running.html">"Running the client"</a> for instructions on how to use it to run L1 and/or L2 networks.</p>
+<h2 id="installing-through-cargo-install"><a class="header" href="#installing-through-cargo-install">Installing through <code>cargo install</code></a></h2>
+<p>To install the client, <a href="https://www.rust-lang.org/tools/install">first install Rust</a> and then run:</p>
+<pre><code class="language-sh">cargo install --locked ethrex \
+    --git https://github.com/lambdaclass/ethrex.git \
+    --tag v0.0.2-rc.1 \
+    --features dev
+</code></pre>
+<p>This installs the <code>ethrex</code> binary.
+For more information on how it is built and installed, see <a href="https://doc.rust-lang.org/cargo/commands/cargo-install.html">the cargo-install documentation</a>.</p>
+<p>After that, you can verify the program is working by running:</p>
+<pre><code class="language-sh">ethrex --version
+</code></pre>
+<p>This should output something like:</p>
+<pre><code class="language-text">ethrex ethrex/v0.1.0-HEAD-23191af/aarch64-apple-darwin/rustc-v1.87.0
+</code></pre>
+<p>After installing the client, see <a href="./running.html">"Running the client"</a> for instructions on how to use it to run L1 and/or L2 networks.</p>
+<h2 id="building-from-source"><a class="header" href="#building-from-source">Building from source</a></h2>
+<p>This section assumes you already have <a href="https://www.rust-lang.org/tools/install">Rust's <code>cargo</code></a> and <a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git"><code>git</code></a> installed.</p>
+<p>You can download the source code of a release from the <a href="https://github.com/lambdaclass/ethrex/releases">GitHub releases page</a>, or by cloning the repository at that version:</p>
+<pre><code class="language-sh">git clone --branch &lt;LATEST_VERSION_HERE&gt; --depth 1 https://github.com/lambdaclass/ethrex.git
+</code></pre>
+<p>After that, you can run the following command inside the cloned repo to build the client:</p>
+<pre><code class="language-sh">cargo build --bin ethrex --release --features dev
+</code></pre>
+<p>You can find the built binary inside <code>target/release</code> directory:</p>
+<pre><code class="language-sh">./target/release/ethrex --version
+</code></pre>
+<p>This should output something like:</p>
+<pre><code class="language-text">ethrex ethrex/v0.1.0-HEAD-23191af/aarch64-apple-darwin/rustc-v1.87.0
+</code></pre>
+<div class="mdbook-alerts mdbook-alerts-tip">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  tip
+</p>
+<p>For convenience, you can move the <code>ethrex</code> binary to a directory in your <code>PATH</code>, so you can run it from anywhere.</p>
+</div>
+<p>After installing the client, see <a href="./running.html">"Running the client"</a> for instructions on how to use it to run L1 and/or L2 networks.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../perf_reports/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../getting-started/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="../getting-started/running.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -310,10 +332,13 @@ appending the length as the size of the encoded buffer (number of bytes).</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../perf_reports/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../getting-started/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="../getting-started/running.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

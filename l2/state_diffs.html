@@ -169,7 +169,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <style>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<style>
 .mdbook-alerts {
   padding: 8px 16px;
   margin-bottom: 16px;
@@ -287,7 +288,7 @@
 <li>First two bytes are the number of entries, then come the tuples <code>(to_u160, amount_u256, tx_hash_u256)</code>.</li>
 </ul>
 </li>
-<li>Next the <code>DepositLogs</code> field:
+<li>Next the <code>PrivilegedTransactionLogs</code> field:
 <ul>
 <li>First two bytes are the number of entries, then come the tuples <code>(to_u160, value_u256)</code>.</li>
 </ul>
@@ -311,8 +312,8 @@ number_of_modified_accounts_u16 ||
 // Withdraw Logs
 number_of_withdraw_logs_u16 ||
 (to_u160 || amount_u256 || tx_hash_u256) ...
-// Deposit Logs
-number_of_deposit_logs_u16 ||
+// Privileged Transactions Logs
+number_of_privileged_transaction_logs_u16 ||
 (to_u160 || value_u256) ...
 </code></pre>
 <p>The sequencer will then make a commitment to this encoded state diff (explained in the EIP 4844 section how this is done) and send on the <code>commit</code> transaction:</p>
@@ -336,7 +337,7 @@ number_of_deposit_logs_u16 ||
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../l2/withdrawals.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../l2/deposits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -350,7 +351,7 @@ number_of_deposit_logs_u16 ||
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../l2/withdrawals.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../l2/deposits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

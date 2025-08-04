@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>2025-04-03 - Ethrex</title>
+        <title>Quick start L1 - Ethrex</title>
 
 
         <!-- Custom HTML head -->
@@ -237,72 +237,40 @@
 }
 
 </style>
-<h1 id="eliminating-redundant-rlp-encoding-in-trie-pr-2353"><a class="header" href="#eliminating-redundant-rlp-encoding-in-trie-pr-2353">Eliminating redundant RLP encoding in trie (PR #2353)</a></h1>
-<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
-<p>This PR addresses a performance bottleneck in our Merkle-Patricia Trie implementation caused by redundant RLP (Recursive Length Prefix) encoding operations. By refactoring the encoding logic to avoid double-encoding, we achieved <strong>1.5x–2x faster trie insertions</strong> for workloads of 1k and 10k nodes.</p>
-<h2 id="context"><a class="header" href="#context">Context</a></h2>
-<p>The trie structure is critical for Ethereum state management, and its performance directly impacts node synchronization and block processing times. RLP encoding is used extensively to serialize trie nodes for hashing and storage. Profiling revealed that a significant portion of insertion time was spent on unnecessary RLP re-encoding.</p>
-<h2 id="tools--methodology"><a class="header" href="#tools--methodology">Tools &amp; Methodology</a></h2>
-<h3 id="profiling-tools"><a class="header" href="#profiling-tools">Profiling Tools</a></h3>
-<ol>
-<li><strong><a href="https://github.com/mstange/samply">Samply</a></strong>:
+<h1 id="quick-start-l1-localnet"><a class="header" href="#quick-start-l1-localnet">Quick Start (L1 localnet)</a></h1>
+<p>This page will show you how to quickly spin up a local development network with ethrex.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
 <ul>
-<li>Sampled CPU usage during trie insertions, identifying RLP encoding as a hotspot (15% of runtime).</li>
-<li>Generated <a href="https://share.firefox.dev/43z7r8V">flamegraph</a> showing <code>encode_to_vec</code> taking a considerable amount of time.</li>
+<li><a href="https://docs.kurtosis.com/install/#ii-install-the-cli">Kurtosis</a></li>
+<li><a href="https://www.rust-lang.org/tools/install">Rust</a></li>
+<li><a href="https://docs.docker.com/engine/install/">Docker</a></li>
 </ul>
-</li>
-<li><strong>Cargo Bench</strong>:
-<ul>
-<li>Provided reproducible benchmarks for trie insertions (1k/10k nodes).</li>
-</ul>
-</li>
-</ol>
-<h3 id="benchmark-setup"><a class="header" href="#benchmark-setup">Benchmark Setup</a></h3>
-<ul>
-<li>
-<p><strong>Code Location</strong>: Benchmarks are defined in <code>crates/common/trie/benches/trie_bench.rs</code>.</p>
-</li>
-<li>
-<p><strong>How to Run</strong>:</p>
-<pre><code class="language-bash"># Navigate to the trie crate
-cd crates/common/trie
-
-# Run benchmarks (includes warmup and simple statistics with cargo-bench)
-make bench
+<h2 id="starting-a-local-devnet"><a class="header" href="#starting-a-local-devnet">Starting a local devnet</a></h2>
+<pre><code class="language-shell">make localnet
 </code></pre>
-</li>
-</ul>
-<h3 id="hardware"><a class="header" href="#hardware">Hardware</a></h3>
-<ul>
-<li><strong>Apple M3 Max</strong>: 14-core CPU, 36GB RAM, 1TB SSD.</li>
-</ul>
-<h2 id="benchmark-results"><a class="header" href="#benchmark-results">Benchmark Results</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Workload</th><th>Baseline (ms)</th><th>After PR #2353 (ms)</th></tr></thead><tbody>
-<tr><td>Insert 1k Nodes</td><td>9.96 – 10.02</td><td>5.78 – 5.82</td></tr>
-<tr><td>Insert 10k Nodes</td><td>111.2 – 111.6</td><td>67.6 – 68.6</td></tr>
-</tbody></table>
-</div>
-<h2 id="technical-breakdown"><a class="header" href="#technical-breakdown">Technical Breakdown</a></h2>
-<h3 id="issue-redundant-rlp-encoding"><a class="header" href="#issue-redundant-rlp-encoding">Issue: Redundant RLP Encoding</a></h3>
-<p>The original code calculated the length of an RLP-encoded sequence by:</p>
+<p>This make target will:</p>
 <ol>
-<li>Encoding the entire structure to a temporary buffer.</li>
-<li>Measuring the buffer's length.</li>
-<li>Re-encoding the structure with the length prefix.</li>
+<li>Build our node inside a docker image.</li>
+<li>Fetch our fork <a href="https://github.com/ethpandaops/ethereum-package">ethereum package</a>, a private testnet on which multiple ethereum clients can interact.</li>
+<li>Start the localnet with kurtosis.</li>
 </ol>
-<p>This resulted in <strong>two full encoding passes</strong> for each time we needed to RLP-encode a structure.</p>
-<h3 id="fix-single-pass-encoding"><a class="header" href="#fix-single-pass-encoding">Fix: Single-Pass Encoding</a></h3>
-<p>We replaced the double-encoding logic with a single pass, and then
-appending the length as the size of the encoded buffer (number of bytes).</p>
+<p>If everything went well, you should be faced with our client's logs (ctrl-c to leave).</p>
+<h2 id="stopping-a-local-devnet"><a class="header" href="#stopping-a-local-devnet">Stopping a local devnet</a></h2>
+<p>To stop everything, simply run:</p>
+<pre><code class="language-shell">make stop-localnet
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../perf_reports/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../l1/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="../l1/dev-setup-l1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -310,10 +278,13 @@ appending the length as the size of the encoded buffer (number of bytes).</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../perf_reports/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../l1/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="../l1/dev-setup-l1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

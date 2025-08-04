@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>2025-04-03 - Ethrex</title>
+        <title>Contributing to the Documentation - Ethrex</title>
 
 
         <!-- Custom HTML head -->
@@ -12,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -102,7 +102,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -137,7 +137,7 @@
                     <h1 class="menu-title">Ethrex</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
                         <a href="https://github.com/lambdaclass/ethrex" title="Git repository" aria-label="Git repository">
@@ -237,72 +237,58 @@
 }
 
 </style>
-<h1 id="eliminating-redundant-rlp-encoding-in-trie-pr-2353"><a class="header" href="#eliminating-redundant-rlp-encoding-in-trie-pr-2353">Eliminating redundant RLP encoding in trie (PR #2353)</a></h1>
-<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
-<p>This PR addresses a performance bottleneck in our Merkle-Patricia Trie implementation caused by redundant RLP (Recursive Length Prefix) encoding operations. By refactoring the encoding logic to avoid double-encoding, we achieved <strong>1.5x–2x faster trie insertions</strong> for workloads of 1k and 10k nodes.</p>
-<h2 id="context"><a class="header" href="#context">Context</a></h2>
-<p>The trie structure is critical for Ethereum state management, and its performance directly impacts node synchronization and block processing times. RLP encoding is used extensively to serialize trie nodes for hashing and storage. Profiling revealed that a significant portion of insertion time was spent on unnecessary RLP re-encoding.</p>
-<h2 id="tools--methodology"><a class="header" href="#tools--methodology">Tools &amp; Methodology</a></h2>
-<h3 id="profiling-tools"><a class="header" href="#profiling-tools">Profiling Tools</a></h3>
-<ol>
-<li><strong><a href="https://github.com/mstange/samply">Samply</a></strong>:
-<ul>
-<li>Sampled CPU usage during trie insertions, identifying RLP encoding as a hotspot (15% of runtime).</li>
-<li>Generated <a href="https://share.firefox.dev/43z7r8V">flamegraph</a> showing <code>encode_to_vec</code> taking a considerable amount of time.</li>
-</ul>
-</li>
-<li><strong>Cargo Bench</strong>:
-<ul>
-<li>Provided reproducible benchmarks for trie insertions (1k/10k nodes).</li>
-</ul>
-</li>
-</ol>
-<h3 id="benchmark-setup"><a class="header" href="#benchmark-setup">Benchmark Setup</a></h3>
+<h1 id="contributing-to-the-documentation"><a class="header" href="#contributing-to-the-documentation">Contributing to the Documentation</a></h1>
+<p>We welcome contributions to the documentation! If you want to help improve or expand the docs, please follow these guidelines:</p>
+<h2 id="how-to-edit-the-docs"><a class="header" href="#how-to-edit-the-docs">How to Edit the Docs</a></h2>
 <ul>
 <li>
-<p><strong>Code Location</strong>: Benchmarks are defined in <code>crates/common/trie/benches/trie_bench.rs</code>.</p>
+<p>All documentation lives in this <code>docs/</code> directory and its subfolders.</p>
 </li>
 <li>
-<p><strong>How to Run</strong>:</p>
-<pre><code class="language-bash"># Navigate to the trie crate
-cd crates/common/trie
-
-# Run benchmarks (includes warmup and simple statistics with cargo-bench)
-make bench
+<p>The documentation is written in Markdown and rendered using <a href="https://rust-lang.github.io/mdBook/">mdBook</a>.</p>
+</li>
+<li>
+<p>To preview your changes locally, <a href="#documentation-dependencies">install the dependencies</a> and run:</p>
+<pre><code class="language-sh">make docs-serve
 </code></pre>
+<p>This will start a local server and open the docs in your browser.</p>
 </li>
 </ul>
-<h3 id="hardware"><a class="header" href="#hardware">Hardware</a></h3>
+<h2 id="adding-or-editing-content"><a class="header" href="#adding-or-editing-content">Adding or Editing Content</a></h2>
 <ul>
-<li><strong>Apple M3 Max</strong>: 14-core CPU, 36GB RAM, 1TB SSD.</li>
+<li>To add a new page, create a new <code>.md</code> file in the appropriate subdirectory and add a link to it in <code>SUMMARY.md</code>.</li>
+<li>To edit an existing page, simply modify the relevant <code>.md</code> file.</li>
+<li>For style and formatting, try to keep a consistent tone and structure with the rest of the documentation.</li>
 </ul>
-<h2 id="benchmark-results"><a class="header" href="#benchmark-results">Benchmark Results</a></h2>
-<div class="table-wrapper"><table><thead><tr><th>Workload</th><th>Baseline (ms)</th><th>After PR #2353 (ms)</th></tr></thead><tbody>
-<tr><td>Insert 1k Nodes</td><td>9.96 – 10.02</td><td>5.78 – 5.82</td></tr>
-<tr><td>Insert 10k Nodes</td><td>111.2 – 111.6</td><td>67.6 – 68.6</td></tr>
-</tbody></table>
-</div>
-<h2 id="technical-breakdown"><a class="header" href="#technical-breakdown">Technical Breakdown</a></h2>
-<h3 id="issue-redundant-rlp-encoding"><a class="header" href="#issue-redundant-rlp-encoding">Issue: Redundant RLP Encoding</a></h3>
-<p>The original code calculated the length of an RLP-encoded sequence by:</p>
-<ol>
-<li>Encoding the entire structure to a temporary buffer.</li>
-<li>Measuring the buffer's length.</li>
-<li>Re-encoding the structure with the length prefix.</li>
-</ol>
-<p>This resulted in <strong>two full encoding passes</strong> for each time we needed to RLP-encode a structure.</p>
-<h3 id="fix-single-pass-encoding"><a class="header" href="#fix-single-pass-encoding">Fix: Single-Pass Encoding</a></h3>
-<p>We replaced the double-encoding logic with a single pass, and then
-appending the length as the size of the encoded buffer (number of bytes).</p>
+<h2 id="documentation-dependencies"><a class="header" href="#documentation-dependencies">Documentation dependencies</a></h2>
+<p>We use some mdBook preprocessors and backends for extra features:</p>
+<ul>
+<li><a href="https://github.com/lambdalisue/rs-mdbook-alerts"><code>mdbook-alerts</code></a> for custom markdown syntax.</li>
+<li><a href="https://github.com/badboy/mdbook-mermaid"><code>mdbook-mermaid</code></a> for diagrams.</li>
+<li><a href="https://github.com/Michael-F-Bryan/mdbook-linkcheck"><code>mdbook-linkcheck</code></a> for checking broken links (optional).</li>
+</ul>
+<p>You can install mdBook and all dependencies with:</p>
+<pre><code class="language-sh">make docs-deps
+</code></pre>
+<h2 id="submitting-changes"><a class="header" href="#submitting-changes">Submitting Changes</a></h2>
+<ul>
+<li>Please open a Pull Request with your proposed changes.</li>
+<li>If you are adding new content, update <code>SUMMARY.md</code> so it appears in the navigation.</li>
+<li>If you have questions, open an issue or ask in the community chat.</li>
+</ul>
+<p>Thank you for helping improve the documentation!</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../perf_reports/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="ethrex_replay/profiling.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="perf_reports/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -310,10 +296,13 @@ appending the length as the size of the encoded buffer (number of bytes).</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../perf_reports/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="ethrex_replay/profiling.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="perf_reports/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
@@ -326,17 +315,17 @@ appending the length as the size of the encoded buffer (number of bytes).</p>
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script src="../mermaid.min.js"></script>
-        <script src="../mermaid-init.js"></script>
+        <script src="mermaid.min.js"></script>
+        <script src="mermaid-init.js"></script>
 
 
     </div>
