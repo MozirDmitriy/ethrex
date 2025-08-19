@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1754339475685,
+  "lastUpdate": 1755606126248,
   "repoUrl": "https://github.com/MozirDmitriy/ethrex",
   "entries": {
     "Benchmark": [
@@ -59,6 +59,36 @@ window.BENCHMARK_DATA = {
             "name": "Block import/Block import ERC20 transfers",
             "value": 164900720785,
             "range": "± 551968938",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "rodrigooliveri10@gmail.com",
+            "name": "Rodrigo Oliveri",
+            "username": "rodrigo-o"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d85e6d4d6641b0c4c82583ea5c0a231bd4b17d92",
+          "message": "chore(l1): cache tx hash (#4049)\n\n**Motivation**\n\nWe saw that the hashing of txs takes a significant amount of time and\npart of it is repeated.\n\n**Description**\n\nThis PR create a new public hash function that allows to cache the\ncomputation of the hash for subsequent calls.\n\nAfter merging main there are some more changes needed. I'm taking a look\nat them.\n\nCloses #issue_number",
+          "timestamp": "2025-08-18T21:43:40Z",
+          "tree_id": "a5a65c360ff46435aa2d7d0ca14508f47123321f",
+          "url": "https://github.com/MozirDmitriy/ethrex/commit/d85e6d4d6641b0c4c82583ea5c0a231bd4b17d92"
+        },
+        "date": 1755606123873,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "Block import/Block import ERC20 transfers",
+            "value": 162216287837,
+            "range": "± 462775887",
             "unit": "ns/iter"
           }
         ]
