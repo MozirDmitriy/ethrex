@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Fundamentals - Ethrex</title>
+        <title>Benchmark Comparisons - Ethrex</title>
 
 
         <!-- Custom HTML head -->
@@ -237,49 +237,117 @@
 }
 
 </style>
-<h1 id="fundamentals"><a class="header" href="#fundamentals">Fundamentals</a></h1>
-<p>In L2 mode, the ethrex code is repurposed to run a rollup that settles on Ethereum as the L1.</p>
-<p>The main differences between this mode and regular ethrex are:</p>
+<h1 id="zkvm-comparison"><a class="header" href="#zkvm-comparison">zkVM Comparison</a></h1>
+<p>This page provides benchmark comparisons between ethrex and other implementations, along with a feature matrix for supported zkVM backends.</p>
+<h2 id="ethrex-vs-rsp-sp1"><a class="header" href="#ethrex-vs-rsp-sp1">ethrex vs RSP (SP1)</a></h2>
+<p>RSP (RISC Zero/SP1 Prover) is Succinct's implementation for proving Ethereum blocks. Here's how ethrex compares on mainnet blocks:</p>
+<div class="table-wrapper"><table><thead><tr><th>Block</th><th>Gas Used</th><th>ethrex (SP1)</th><th>RSP</th><th>Difference</th></tr></thead><tbody>
+<tr><td>23769082</td><td>7.9M</td><td>2m 23s</td><td>1m 27s</td><td>+63%</td></tr>
+<tr><td>23769083</td><td>44.9M</td><td>12m 24s</td><td>7m 49s</td><td>+59%</td></tr>
+<tr><td>23769084</td><td>27.1M</td><td>8m 40s</td><td>Failed</td><td>—</td></tr>
+<tr><td>23769085</td><td>22.2M</td><td>6m 40s</td><td>Failed</td><td>—</td></tr>
+<tr><td>23769086</td><td>28.4M</td><td>7m 36s</td><td>4m 45s</td><td>+60%</td></tr>
+<tr><td>23769087</td><td>17.5M</td><td>6m 02s</td><td>Failed</td><td>—</td></tr>
+<tr><td>23769088</td><td>17.5M</td><td>4m 50s</td><td>2m 59s</td><td>+61%</td></tr>
+<tr><td>23769089</td><td>23.9M</td><td>8m 14s</td><td>4m 44s</td><td>+74%</td></tr>
+<tr><td>23769090</td><td>24.2M</td><td>8m 11s</td><td>4m 40s</td><td>+75%</td></tr>
+<tr><td>23769091</td><td>24.4M</td><td>7m 02s</td><td>Failed</td><td>—</td></tr>
+<tr><td>23769092</td><td>21.7M</td><td>6m 35s</td><td>4m 01s</td><td>+64%</td></tr>
+</tbody></table>
+</div><div class="mdbook-alerts mdbook-alerts-note">
+<p class="mdbook-alerts-title">
+  <span class="mdbook-alerts-icon"></span>
+  note
+</p>
+<p>RSP failed on several blocks with <code>block gas used mismatch</code> errors. ethrex successfully proved all blocks.</p>
+</div>
+<p><strong>Hardware:</strong></p>
 <ul>
-<li>In regular rollup mode, there is no consensus; the node is turned into a sequencer that proposes blocks for the chain. In based rollup mode, consensus is achieved by a mechanism that rotates sequencers, enforced by the L1.</li>
-<li>Block execution is proven using a RISC-V zkVM (or attested to using TDX, a Trusted Execution Environment) and its proofs (or signatures/attestations) are sent to L1 for verification.</li>
-<li>A set of Solidity contracts to be deployed to the L1 are included as part of chain initialization.</li>
-<li>Two new types of transactions are included: deposits (native token mints) and withdrawals.</li>
+<li>ethrex: AMD EPYC 7713 64-Core, 128GB RAM, RTX 4090</li>
+<li>RSP: AMD EPYC 7F72 24-Core, 64GB RAM, RTX 4090</li>
 </ul>
-<p>At a high level, the following new parts are added to the node:</p>
-<ul>
-<li>A <code>proposer</code> component, in charge of continually creating new blocks from the mempool transactions. This replaces the regular flow that an Ethereum L1 node has, where new blocks come from the consensus layer through the <code>forkChoiceUpdate</code> -&gt; <code>getPayload</code> -&gt; <code>NewPayload</code> Engine API flow in communication with the consensus layer.</li>
-<li>A <code>prover</code> subsystem, which itself consists of two parts:
-<ul>
-<li>A <code>proverClient</code> that takes new blocks from the node, proves them, then sends the proof back to the node to send to the L1. This is a separate binary running outside the node, as proving has very different (and higher) hardware requirements than the sequencer.</li>
-<li>A <code>proverServer</code> component inside the node that communicates with the prover, sending witness data for proving and receiving proofs for settlement on L1.</li>
-</ul>
-</li>
-<li>L1 contracts with functions to commit to new state and then verify the state transition function, only advancing the state of the L2 if the proof verifies. It also has functionality to process deposits and withdrawals to/from the L2.</li>
-<li>The EVM is lightly modified with new features to process deposits and withdrawals accordingly.</li>
-</ul>
-<h2 id="ethrex-l2-documentation"><a class="header" href="#ethrex-l2-documentation">Ethrex L2 documentation</a></h2>
-<p>For general documentation, see:</p>
-<ul>
-<li><a href="../architecture/overview.html">Architecture overview</a> for a high-level view of the ethrex L2 stack.</li>
-<li><a href="./contracts.html">Smart contracts</a> has information on L1 and L2 smart contracts including steps to upgrade and transfer ownserhip.</li>
-<li><a href="./based.html">Based sequencing</a> contains ethrex's roadmap for becoming based.</li>
-<li><a href="./state_diffs.html">State diffs</a> explains the mechanism needed to provide data availability.</li>
-<li>How asset <a href="./deposits.html">deposits</a> and <a href="./withdrawals.html">withdrawals</a> work.</li>
-<li><a href="./fee_token.html">Fee token</a></li>
-<li><a href="./exit_window.html">Exit window</a> and <a href="./timelock.html">Timelock</a> for upgrade safety mechanisms.</li>
-<li><a href="./ethrex_l2_aligned_integration.html">Aligned Layer Integration</a> details how ethrex L2 integrates with Aligned Layer for proof aggregation and verification.</li>
-</ul>
+<h2 id="zkvm-backend-comparison"><a class="header" href="#zkvm-backend-comparison">zkVM Backend Comparison</a></h2>
+<p>ethrex supports multiple zkVM backends with varying features and maturity levels:</p>
+<div class="table-wrapper"><table><thead><tr><th>Feature</th><th>SP1</th><th>RISC Zero</th><th>ZisK</th><th>OpenVM</th></tr></thead><tbody>
+<tr><td><strong>Status</strong></td><td>Production</td><td>Production</td><td>Experimental</td><td>Experimental</td></tr>
+<tr><td><strong>GPU Acceleration</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td><strong>L2 Prover</strong></td><td>✓</td><td>✓</td><td>Planned</td><td>Planned</td></tr>
+<tr><td><strong>Proof Aggregation</strong></td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+</tbody></table>
+</div>
+<h3 id="precompile-support"><a class="header" href="#precompile-support">Precompile Support</a></h3>
+<p>ZK proving of Ethereum precompiles varies by backend:</p>
+<div class="table-wrapper"><table><thead><tr><th>Precompile</th><th>SP1</th><th>RISC Zero</th><th>ZisK</th></tr></thead><tbody>
+<tr><td>ecrecover</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>SHA256</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>RIPEMD160</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>identity</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>modexp</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>ecAdd</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>ecMul</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>ecPairing</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>blake2f</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>KZG point evaluation</td><td>✓</td><td>⚠️</td><td>⚠️</td></tr>
+<tr><td>BLS12-381</td><td>✓</td><td>⚠️</td><td>✓</td></tr>
+<tr><td>P256 verify</td><td>✓</td><td>✓</td><td>⚠️</td></tr>
+</tbody></table>
+</div>
+<p>Legend: ✓ = Supported with patches, ⚠️ = Limited or requires unstable features</p>
+<h2 id="optimization-impact"><a class="header" href="#optimization-impact">Optimization Impact</a></h2>
+<p>ethrex has undergone significant optimization for zkVM proving:</p>
+<div class="table-wrapper"><table><thead><tr><th>Optimization</th><th>Impact</th><th>Description</th></tr></thead><tbody>
+<tr><td>Jumpdest analysis</td><td>-15% cycles</td><td>Optimized jump destination validation</td></tr>
+<tr><td>Trie caching</td><td>-50% hash calls</td><td>Cache initial node hashes during trie construction</td></tr>
+<tr><td>Trie hashing</td><td>-75% trie cycles</td><td>Improved traversal and RLP encoding</td></tr>
+<tr><td>Trie operations</td><td>-93% get/insert cycles</td><td>Eliminated unnecessary node cloning</td></tr>
+<tr><td>Serialized tries</td><td>-22% total cycles</td><td>Pre-serialize resolved tries, skip decoding</td></tr>
+<tr><td>ecPairing patch</td><td>-10% total cycles</td><td>138k → 6k cycles per operation</td></tr>
+<tr><td>ecMul patch</td><td>-10% total cycles</td><td>Accelerated scalar multiplication</td></tr>
+</tbody></table>
+</div>
+<p>See <a href="./prover_performance.html">prover_performance.md</a> for detailed optimization history.</p>
+<h2 id="reproduction-instructions"><a class="header" href="#reproduction-instructions">Reproduction Instructions</a></h2>
+<h3 id="ethrex-benchmarks"><a class="header" href="#ethrex-benchmarks">ethrex Benchmarks</a></h3>
+<ol>
+<li>Clone <a href="https://github.com/lambdaclass/ethrex-replay">ethrex-replay</a></li>
+<li>Run the prover:</li>
+</ol>
+<pre><code class="language-bash">cargo r -r -F "sp1,gpu" -p ethrex-replay -- blocks \
+  --action prove \
+  --zkvm sp1 \
+  --from 23769082 \
+  --to 23769092 \
+  --rpc-url &lt;RPC_WITH_DEBUG_EXECUTIONWITNESS&gt;
+</code></pre>
+<h3 id="rsp-benchmarks"><a class="header" href="#rsp-benchmarks">RSP Benchmarks</a></h3>
+<ol>
+<li>Clone <a href="https://github.com/succinctlabs/rsp">rsp</a></li>
+<li>Run with CUDA:</li>
+</ol>
+<pre><code class="language-bash">SP1_PROVER=cuda cargo r -r \
+  --manifest-path bin/host/Cargo.toml \
+  --block-number &lt;BLOCK&gt; \
+  --rpc-url &lt;RPC&gt; \
+  --prove
+</code></pre>
+<h2 id="hardware-recommendations"><a class="header" href="#hardware-recommendations">Hardware Recommendations</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Use Case</th><th>Minimum</th><th>Recommended</th></tr></thead><tbody>
+<tr><td>Development</td><td>32GB RAM, 8 cores</td><td>64GB RAM, 16 cores</td></tr>
+<tr><td>Production (CPU)</td><td>64GB RAM, 32 cores</td><td>128GB RAM, 64 cores</td></tr>
+<tr><td>Production (GPU)</td><td>64GB RAM, RTX 3090</td><td>128GB RAM, RTX 4090</td></tr>
+</tbody></table>
+</div>
+<p>GPU proving is significantly faster and recommended for production workloads. All modern NVIDIA GPUs with 24GB+ VRAM are supported.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../l2/interacting/shared_bridge.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../zkvm-integrations.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../l2/fundamentals/state_diffs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../l2/bench/prover_performance.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -289,11 +357,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../l2/interacting/shared_bridge.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../zkvm-integrations.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../l2/fundamentals/state_diffs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../l2/bench/prover_performance.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

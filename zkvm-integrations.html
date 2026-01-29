@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Fundamentals - Ethrex</title>
+        <title>zkVM Integrations - Ethrex</title>
 
 
         <!-- Custom HTML head -->
@@ -12,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../../favicon.svg">
-        <link rel="shortcut icon" href="../../favicon.png">
-        <link rel="stylesheet" href="../../css/variables.css">
-        <link rel="stylesheet" href="../../css/general.css">
-        <link rel="stylesheet" href="../../css/chrome.css">
-        <link rel="stylesheet" href="../../css/print.css" media="print">
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../../fonts/fonts.css">
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../../";
+            const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc.js"></script>
+        <script src="toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -102,7 +102,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -137,7 +137,7 @@
                     <h1 class="menu-title">Ethrex</h1>
 
                     <div class="right-buttons">
-                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
                         <a href="https://github.com/lambdaclass/ethrex" title="Git repository" aria-label="Git repository">
@@ -237,49 +237,165 @@
 }
 
 </style>
-<h1 id="fundamentals"><a class="header" href="#fundamentals">Fundamentals</a></h1>
-<p>In L2 mode, the ethrex code is repurposed to run a rollup that settles on Ethereum as the L1.</p>
-<p>The main differences between this mode and regular ethrex are:</p>
+<h1 id="zkvm-integrations"><a class="header" href="#zkvm-integrations">zkVM Integrations</a></h1>
+<p>ethrex integrates with multiple zero-knowledge virtual machines (zkVMs), giving you flexibility in how you prove Ethereum execution. This page provides an overview of each integration, its status, and links to deployment documentation.</p>
+<h2 id="integration-overview"><a class="header" href="#integration-overview">Integration Overview</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>zkVM</th><th>Organization</th><th>Status</th><th>L1 Proving</th><th>L2 Prover</th><th>Documentation</th></tr></thead><tbody>
+<tr><td><strong>SP1</strong></td><td>Succinct</td><td>Production</td><td>✓</td><td>✓</td><td><a href="./l2/deployment/prover/sp1.html">SP1 Prover Guide</a></td></tr>
+<tr><td><strong>RISC Zero</strong></td><td>RISC Zero</td><td>Production</td><td>✓</td><td>✓</td><td><a href="./l2/deployment/prover/risc0.html">RISC0 Prover Guide</a></td></tr>
+<tr><td><strong>ZisK</strong></td><td>Polygon</td><td>Experimental</td><td>✓</td><td>Planned</td><td>Coming soon</td></tr>
+<tr><td><strong>OpenVM</strong></td><td>Axiom</td><td>Experimental</td><td>✓</td><td>Planned</td><td>Coming soon</td></tr>
+<tr><td><strong>TEE (TDX)</strong></td><td>Intel</td><td>Production</td><td>—</td><td>✓</td><td><a href="./l2/deployment/prover/tee.html">TDX Prover Guide</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="sp1-succinct"><a class="header" href="#sp1-succinct">SP1 (Succinct)</a></h2>
+<p><a href="https://docs.succinct.xyz/">SP1</a> is a zkVM developed by Succinct Labs that enables efficient proving of arbitrary Rust programs.</p>
+<p><strong>Status:</strong> Production-ready for both L1 proving and L2 prover deployments.</p>
+<p><strong>Key Features:</strong></p>
 <ul>
-<li>In regular rollup mode, there is no consensus; the node is turned into a sequencer that proposes blocks for the chain. In based rollup mode, consensus is achieved by a mechanism that rotates sequencers, enforced by the L1.</li>
-<li>Block execution is proven using a RISC-V zkVM (or attested to using TDX, a Trusted Execution Environment) and its proofs (or signatures/attestations) are sent to L1 for verification.</li>
-<li>A set of Solidity contracts to be deployed to the L1 are included as part of chain initialization.</li>
-<li>Two new types of transactions are included: deposits (native token mints) and withdrawals.</li>
+<li>GPU acceleration via CUDA</li>
+<li>Proof aggregation support</li>
+<li>Extensive precompile patches for Ethereum operations</li>
+<li>Active development and community support</li>
 </ul>
-<p>At a high level, the following new parts are added to the node:</p>
+<p><strong>Integration Details:</strong></p>
 <ul>
-<li>A <code>proposer</code> component, in charge of continually creating new blocks from the mempool transactions. This replaces the regular flow that an Ethereum L1 node has, where new blocks come from the consensus layer through the <code>forkChoiceUpdate</code> -&gt; <code>getPayload</code> -&gt; <code>NewPayload</code> Engine API flow in communication with the consensus layer.</li>
-<li>A <code>prover</code> subsystem, which itself consists of two parts:
+<li>ethrex uses SP1's precompile patches for optimized cryptographic operations</li>
+<li>Supports both CPU and GPU proving modes</li>
+<li>Compatible with Aligned Layer for proof aggregation</li>
+</ul>
+<p><strong>Get Started:</strong></p>
 <ul>
-<li>A <code>proverClient</code> that takes new blocks from the node, proves them, then sends the proof back to the node to send to the L1. This is a separate binary running outside the node, as proving has very different (and higher) hardware requirements than the sequencer.</li>
-<li>A <code>proverServer</code> component inside the node that communicates with the prover, sending witness data for proving and receiving proofs for settlement on L1.</li>
+<li><a href="./l2/deployment/prover/sp1.html">Run an ethrex SP1 prover</a></li>
+<li><a href="https://docs.succinct.xyz/">SP1 Documentation</a></li>
 </ul>
-</li>
-<li>L1 contracts with functions to commit to new state and then verify the state transition function, only advancing the state of the L2 if the proof verifies. It also has functionality to process deposits and withdrawals to/from the L2.</li>
-<li>The EVM is lightly modified with new features to process deposits and withdrawals accordingly.</li>
-</ul>
-<h2 id="ethrex-l2-documentation"><a class="header" href="#ethrex-l2-documentation">Ethrex L2 documentation</a></h2>
-<p>For general documentation, see:</p>
+<h2 id="risc-zero"><a class="header" href="#risc-zero">RISC Zero</a></h2>
+<p><a href="https://dev.risczero.com/">RISC Zero</a> is a zkVM built on the RISC-V architecture, providing a general-purpose proving environment.</p>
+<p><strong>Status:</strong> Production-ready for both L1 proving and L2 prover deployments.</p>
+<p><strong>Key Features:</strong></p>
 <ul>
-<li><a href="../architecture/overview.html">Architecture overview</a> for a high-level view of the ethrex L2 stack.</li>
-<li><a href="./contracts.html">Smart contracts</a> has information on L1 and L2 smart contracts including steps to upgrade and transfer ownserhip.</li>
-<li><a href="./based.html">Based sequencing</a> contains ethrex's roadmap for becoming based.</li>
-<li><a href="./state_diffs.html">State diffs</a> explains the mechanism needed to provide data availability.</li>
-<li>How asset <a href="./deposits.html">deposits</a> and <a href="./withdrawals.html">withdrawals</a> work.</li>
-<li><a href="./fee_token.html">Fee token</a></li>
-<li><a href="./exit_window.html">Exit window</a> and <a href="./timelock.html">Timelock</a> for upgrade safety mechanisms.</li>
-<li><a href="./ethrex_l2_aligned_integration.html">Aligned Layer Integration</a> details how ethrex L2 integrates with Aligned Layer for proof aggregation and verification.</li>
+<li>GPU acceleration support</li>
+<li>Bonsai proving network for distributed proving</li>
+<li>Strong developer tooling and documentation</li>
 </ul>
+<p><strong>Integration Details:</strong></p>
+<ul>
+<li>ethrex integrates with risc0-ethereum for optimized trie operations</li>
+<li>Supports CUDA acceleration for faster proving</li>
+<li>Some precompiles (Keccak, BLS12-381) require the "unstable" feature flag</li>
+</ul>
+<p><strong>Get Started:</strong></p>
+<ul>
+<li><a href="./l2/deployment/prover/risc0.html">Run an ethrex RISC0 prover</a></li>
+<li><a href="https://dev.risczero.com/">RISC Zero Documentation</a></li>
+</ul>
+<h2 id="zisk-polygon"><a class="header" href="#zisk-polygon">ZisK (Polygon)</a></h2>
+<p><a href="https://0xpolygonhermez.github.io/zisk/">ZisK</a> is Polygon's zkVM designed for high-performance proving with GPU acceleration.</p>
+<p><strong>Status:</strong> Experimental. L1 proving is functional; L2 integration is planned.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Native GPU support with custom CUDA kernels</li>
+<li>Unique MODEXP precompile implementation</li>
+<li>Optimized for high-throughput proving</li>
+</ul>
+<p><strong>Integration Details:</strong></p>
+<ul>
+<li>ethrex supports ZisK for L1 block proving via ethrex-replay</li>
+<li>Most Ethereum precompiles are supported with patches</li>
+<li>P256 verification is not yet available (no patch exists)</li>
+</ul>
+<p><strong>Current Limitations:</strong></p>
+<ul>
+<li>L2 prover integration is not yet complete</li>
+<li>Requires manual installation from source for GPU support</li>
+</ul>
+<h2 id="openvm-axiom"><a class="header" href="#openvm-axiom">OpenVM (Axiom)</a></h2>
+<p><a href="https://book.openvm.dev/">OpenVM</a> is Axiom's modular zkVM framework designed for flexibility and extensibility.</p>
+<p><strong>Status:</strong> Experimental. Initial integration for L1 proving.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Modular architecture for custom extensions</li>
+<li>Support for multiple proving backends</li>
+<li>Designed for composability</li>
+</ul>
+<p><strong>Integration Details:</strong></p>
+<ul>
+<li>Basic integration for L1 block proving</li>
+<li>Precompile support is being expanded</li>
+<li>L2 prover integration is planned</li>
+</ul>
+<h2 id="tee-intel-tdx"><a class="header" href="#tee-intel-tdx">TEE (Intel TDX)</a></h2>
+<p>Intel Trust Domain Extensions (TDX) provides hardware-based trusted execution for block proving.</p>
+<p><strong>Status:</strong> Production-ready for L2 prover deployments.</p>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li>Hardware-based security guarantees</li>
+<li>No cryptographic proving overhead</li>
+<li>Fast execution within trusted enclave</li>
+</ul>
+<p><strong>Integration Details:</strong></p>
+<ul>
+<li>Supported as an L2 prover option</li>
+<li>Can run alongside zkVM provers for redundancy</li>
+<li>Requires TDX-capable hardware</li>
+</ul>
+<p><strong>Get Started:</strong></p>
+<ul>
+<li><a href="./l2/deployment/prover/tee.html">Run an ethrex TDX prover</a></li>
+</ul>
+<h2 id="multi-prover-deployments"><a class="header" href="#multi-prover-deployments">Multi-Prover Deployments</a></h2>
+<p>ethrex supports running multiple provers simultaneously, providing redundancy and flexibility:</p>
+<pre><code>                    ┌─────────────┐
+                    │   ethrex    │
+                    │  Sequencer  │
+                    └──────┬──────┘
+                           │
+           ┌───────────────┼───────────────┐
+           │               │               │
+      ┌────┴────┐    ┌────┴────┐    ┌────┴────┐
+      │   SP1   │    │  RISC0  │    │   TDX   │
+      │ Prover  │    │ Prover  │    │ Prover  │
+      └────┬────┘    └────┬────┘    └────┬────┘
+           │               │               │
+           └───────────────┼───────────────┘
+                           │
+                    ┌──────┴──────┐
+                    │   Aligned   │
+                    │    Layer    │
+                    └─────────────┘
+</code></pre>
+<p>See <a href="./l2/deployment/prover/multi-prover.html">Multi-prover deployment guide</a> for configuration details.</p>
+<h2 id="ecosystem-integrations"><a class="header" href="#ecosystem-integrations">Ecosystem Integrations</a></h2>
+<h3 id="aligned-layer"><a class="header" href="#aligned-layer">Aligned Layer</a></h3>
+<p><a href="https://alignedlayer.com/">Aligned Layer</a> provides proof aggregation and verification services for ethrex L2 deployments.</p>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Aggregates proofs from multiple zkVM backends</li>
+<li>Reduces L1 verification costs</li>
+<li>Supports SP1, RISC Zero, and other proof systems</li>
+</ul>
+<p><strong>Documentation:</strong> <a href="./l2/deployment/aligned.html">ethrex &lt;&gt; Aligned integration</a></p>
+<h2 id="choosing-a-zkvm"><a class="header" href="#choosing-a-zkvm">Choosing a zkVM</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Consideration</th><th>Recommendation</th></tr></thead><tbody>
+<tr><td><strong>Production L2</strong></td><td>SP1 or RISC Zero (most mature)</td></tr>
+<tr><td><strong>Maximum performance</strong></td><td>SP1 with GPU acceleration</td></tr>
+<tr><td><strong>Hardware security</strong></td><td>TEE (TDX)</td></tr>
+<tr><td><strong>Experimentation</strong></td><td>ZisK or OpenVM</td></tr>
+<tr><td><strong>Redundancy</strong></td><td>Multi-prover with SP1 + RISC Zero + TEE</td></tr>
+</tbody></table>
+</div>
+<h2 id="performance-comparison"><a class="header" href="#performance-comparison">Performance Comparison</a></h2>
+<p>See <a href="./l2/bench/zkvm_comparison.html">zkVM Comparison</a> for detailed benchmark data comparing proving times across backends.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../l2/interacting/shared_bridge.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../ROADMAP.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../../l2/fundamentals/state_diffs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="l2/bench/zkvm_comparison.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -289,11 +405,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../l2/interacting/shared_bridge.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../ROADMAP.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../../l2/fundamentals/state_diffs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="l2/bench/zkvm_comparison.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -308,17 +424,17 @@
         </script>
 
 
-        <script src="../../elasticlunr.min.js"></script>
-        <script src="../../mark.min.js"></script>
-        <script src="../../searcher.js"></script>
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
 
-        <script src="../../clipboard.min.js"></script>
-        <script src="../../highlight.js"></script>
-        <script src="../../book.js"></script>
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script src="../../mermaid.min.js"></script>
-        <script src="../../mermaid-init.js"></script>
+        <script src="mermaid.min.js"></script>
+        <script src="mermaid-init.js"></script>
 
 
     </div>
